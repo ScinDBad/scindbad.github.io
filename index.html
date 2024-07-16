@@ -457,23 +457,6 @@
   <script src="assets/js/main.js"></script>
 
 
- <!-- Audio player hidden -->
- <audio id="background-music" src="assets/msk/bgm-2.m4a" loop autoplay></audio>
-
- <script>
-   // Get the audio element
-   const music = document.getElementById('background-music');
-
-   // Play the music when the page loads
-   window.onload = () => {
-     music.play().catch(error => {
-       // Handle the error if autoplay is blocked by the browser
-       console.log('Autoplay was prevented:', error);
-     });
-   };
- </script>
-
-
 </body>
 
 </html>
