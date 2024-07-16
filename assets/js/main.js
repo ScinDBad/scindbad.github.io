@@ -230,15 +230,15 @@
    * EmailJS integration for contact form
    */
   (function () {
-    emailjs.init('');  //Public Key
+    emailjs.init('ZK1uPg1H9SW-6CDWe');  //Public Key
   })();
 
   document.getElementById('contact-form').addEventListener('submit', function (event) {
     event.preventDefault();
 
     // These IDs from the previous steps
-    const serviceID = '';   //Service Id
-    const templateID = '';  //
+    const serviceID = 'service_wfkkj5g';   //Service Id
+    const templateID = 'template_sziq9oo';  //
 
     const templateParams = {
       from_name: this.querySelector('input[name="name"]').value,
