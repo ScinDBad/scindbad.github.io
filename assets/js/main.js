@@ -246,7 +246,7 @@
     const subject = this.querySelector('input[name="subject"]').value;
     const message = this.querySelector('textarea[name="message"]').value;
 
-    // Construye el mensaje incluyendo el subject y el email
+    // build message including subject and email
     const fullMessage = `Subject: ${subject}\nFrom: ${email}\n\n${message}`;
 
     const templateParams = {
