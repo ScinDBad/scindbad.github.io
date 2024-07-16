@@ -240,11 +240,20 @@
     const serviceID = 'service_wfkkj5g';   //Service Id
     const templateID = 'template_sziq9oo';  //
 
+    // get field values from the form
+    const name = this.querySelector('input[name="name"]').value;
+    const email = this.querySelector('input[name="email"]').value;
+    const subject = this.querySelector('input[name="subject"]').value;
+    const message = this.querySelector('textarea[name="message"]').value;
+
+    // Construye el mensaje incluyendo el subject y el email
+    const fullMessage = `Subject: ${subject}\nFrom: ${email}\n\n${message}`;
+
     const templateParams = {
-      from_name: this.querySelector('input[name="name"]').value,
-      from_email: this.querySelector('input[name="email"]').value,
-      message: this.querySelector('textarea[name="message"]').value,
-      subject: this.querySelector('input[name="subject"]').value
+      from_name: name,
+      from_email: email,
+      message: fullMessage,  // Include subject and email in message field
+      subject: subject
     };
 
     emailjs.send(serviceID, templateID, templateParams)
