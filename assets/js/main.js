@@ -238,7 +238,7 @@
 
     // These IDs from the previous steps
     const serviceID = 'service_wfkkj5g';   //Service Id
-    const templateID = 'template_sziq9oo';  //
+    const templateID = 'template_sziq9oo';  //Template Id
 
     // get field values from the form
     const name = this.querySelector('input[name="name"]').value;
