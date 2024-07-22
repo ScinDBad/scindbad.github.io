@@ -39,39 +39,6 @@
   * Author: BootstrapMade.com
   * License: https://bootstrapmade.com/license/
   ======================================================== -->
-
-<!-- CSS para la presentación de diapositivas -->
-<style>
-  /* Slideshow container */
-  .slideshow-container {
-    position: relative;
-    max-width: 100%;
-    margin: auto;
-    overflow: hidden;
-  }
-
-  /* Hide the images by default */
-  .mySlides {
-    display: none;
-  }
-
-  /* Fading animation */
-  .fade {
-    animation-name: fade;
-    animation-duration: 3s;
-  }
-
-  @keyframes fade {
-    from {opacity: .4}
-    to {opacity: 1}
-  }
-
-  /* Optional: Add a background color to the active slide */
-  .active {
-    background-color: #333;
-  }
-</style>
-
 </head>
 
 <body class="index-page">
@@ -96,23 +63,7 @@
 
     <!-- Home Section -->
     <section id="home" class="hero section light-background">
-      <div class="slideshow-container">
-        <div class="mySlides fade">
-          <img src="assets/img/bg-white-2.jpg" alt="">
-        </div>
-        <div class="mySlides fade">
-          <img src="assets/img/image1.jpg" alt="">
-        </div>
-        <div class="mySlides fade">
-          <img src="assets/img/image2.jpg" alt="">
-        </div>
-        <div class="mySlides fade">
-          <img src="assets/img/image3.jpg" alt="">
-        </div>
-        <div class="mySlides fade">
-          <img src="assets/img/image4.jpg" alt="">
-        </div>
-      </div>
+      <img src="assets/img/bg-white-2.jpg" alt="">
       <div class="container" data-aos="zoom-out">
         <div class="row justify-content-center">
           <div class="col-lg-9">
@@ -132,22 +83,6 @@
       </div>
     </section><!-- /Home Section -->
 
-    <!-- JavaScript para la presentación de diapositivas -->
-    <script>
-      let slideIndex = 0;
-      showSlides();
-
-      function showSlides() {
-        let slides = document.getElementsByClassName("mySlides");
-        for (let i = 0; i < slides.length; i++) {
-          slides[i].style.display = "none";
-        }
-        slideIndex++;
-        if (slideIndex > slides.length) {slideIndex = 1}
-        slides[slideIndex-1].style.display = "block";
-        setTimeout(showSlides, 3000); // Change image every 3 seconds
-      }
-    </script>
 
 
     <!-- About Section -->
