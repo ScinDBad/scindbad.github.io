@@ -63,15 +63,44 @@
 
     <!-- Home Section -->
     <section id="home" class="hero section light-background">
-      <img src="assets/img/bg-white-2.jpg" alt="">
+      <!-- Carousel -->
+      <div id="homeCarousel" class="carousel slide carousel-fade" data-bs-ride="carousel" data-bs-interval="5000">
+        <div class="carousel-inner">
+          <div class="carousel-item active">
+            <img src="assets/img/bg-white-2.jpg" class="d-block w-100" alt="Image 1">
+          </div>
+          <div class="carousel-item">
+            <img src="assets/img/your-image-1.jpg" class="d-block w-100" alt="Image 2">
+          </div>
+          <div class="carousel-item">
+            <img src="assets/img/your-image-2.jpg" class="d-block w-100" alt="Image 3">
+          </div>
+          <div class="carousel-item">
+            <img src="assets/img/your-image-3.jpg" class="d-block w-100" alt="Image 4">
+          </div>
+          <div class="carousel-item">
+            <img src="assets/img/your-image-4.jpg" class="d-block w-100" alt="Image 5">
+          </div>
+        </div>
+        <button class="carousel-control-prev" type="button" data-bs-target="#homeCarousel" data-bs-slide="prev">
+          <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+          <span class="visually-hidden">Previous</span>
+        </button>
+        <button class="carousel-control-next" type="button" data-bs-target="#homeCarousel" data-bs-slide="next">
+          <span class="carousel-control-next-icon" aria-hidden="true"></span>
+          <span class="visually-hidden">Next</span>
+        </button>
+      </div>
+      <!-- /Carousel -->
+
       <div class="container" data-aos="zoom-out">
         <div class="row justify-content-center">
           <div class="col-lg-9">
             <h2>Adrián Vinueza</h2>
             <h3 style="color: #0563BF; font-size: 2rem;">Data Analyst</h3>
-            <p><span class="typed"
-                data-typed-items="Driving decisions with insights., Forecasting future trends., Shaping tomorrow's outcomes., Empowering future choices"></span><span
-                class="typed-cursor typed-cursor--blink" aria-hidden="true"></span></p>
+            <p>
+              <span class="typed" data-typed-items="Driving decisions with insights., Forecasting future trends., Shaping tomorrow's outcomes., Empowering future choices"></span><span class="typed-cursor typed-cursor--blink" aria-hidden="true"></span>
+            </p>
             <div class="social-links">
               <a href="mailto:ajvinuez@outlook.com"><i class="bi bi-envelope"></i></a>
               <a href="https://wa.me/qr/J44CTELJWTEWA1"><i class="bi bi-whatsapp"></i></a>
@@ -82,6 +111,7 @@
         </div>
       </div>
     </section><!-- /Home Section -->
+
 
 
 
