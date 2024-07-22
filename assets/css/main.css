@@ -87,18 +87,6 @@ h6 {
   font-family: var(--heading-font);
 }
 
-/*--------------------------------------------------------------
-# Home carousel
---------------------------------------------------------------*/
-#homeCarousel .carousel-item {
-  transition: opacity 2s ease-in-out;
-}
-
-#homeCarousel {
-  transition: opacity 2s ease-in-out;
-}
-
-
 /* PHP Email Form Messages
 ------------------------------*/
 .php-email-form .error-message {
