@@ -516,17 +516,18 @@
                   <div class="sent-message">Your message has been sent. Thank you!</div>
 
                   <button type="submit">Send Message</button>
+                  
                   <!-- Calendly link widget begin -->
-                  <link href="https://assets.calendly.com/assets/external/widget.css" rel="stylesheet">
-                  <script src="https://assets.calendly.com/assets/external/widget.js" type="text/javascript" async></script>
-                    <button type="button" onclick="openCalendlyWidget()">Schedule time with me</button>
+                    <link href="https://assets.calendly.com/assets/external/widget.css" rel="stylesheet">
+                    <script src="https://assets.calendly.com/assets/external/widget.js" type="text/javascript" async></script>
+                      <button type="button" class="calendly-button" onclick="openCalendlyWidget()">Schedule a Meeting</button>
 
-                      <script>
-                          function openCalendlyWidget() {
-                              Calendly.initPopupWidget({ url: 'https://calendly.com/ajvinueza92/30min' });
-                              return false;
-                          }
-                      </script><!-- Calendly link widget end -->
+                        <script>
+                            function openCalendlyWidget() {
+                                Calendly.initPopupWidget({ url: 'https://calendly.com/ajvinueza92/30min' });
+                                return false;
+                            }
+                        </script><!-- Calendly link widget end -->
                 </div>
 
               </div>

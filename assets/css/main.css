@@ -1147,6 +1147,20 @@ section,
   background: color-mix(in srgb, var(--accent-color), transparent 25%);
 }
 
+/* Estilo para el botón de Calendly */
+.contact .php-email-form button.calendly-button {
+  color: var(--contrast-color);
+  background: var(--accent-color);
+  border: 0;
+  padding: 10px 30px;
+  transition: 0.4s;
+  border-radius: 50px;
+}
+
+.contact .php-email-form button.calendly-button:hover {
+  background: color-mix(in srgb, var(--accent-color), transparent 25%);
+}
+
 /*--------------------------------------------------------------
 # Portfolio Details Section
 --------------------------------------------------------------*/
