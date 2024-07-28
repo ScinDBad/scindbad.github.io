@@ -367,13 +367,19 @@
         <h2>Resume</h2>
         <p></p>
         <div class="text-center mt-4">
-          <a href="assets/docs/Data Analyst Jr_Adrian Vinueza(en).pdf" class="btn btn-primary" download style="background-color: #186fc0; border-color: #186fc0; color: white;">
+          <a href="assets/docs/Data Analyst Jr_Adrian Vinueza(en).pdf" class="btn btn-primary" download style="background-color: #186fc0; border-color: #186fc0; color: white; transition: opacity 0.3s;">
             <i class="bi bi-download" style="color: white;"></i> ENG
           </a>
-          <a href="assets/docs/Data Analyst Jr_Adrian Vinueza (spn).pdf" class="btn btn-primary ms-2" download style="background-color: #186fc0; border-color: #186fc0; color: white;">
+          <a href="assets/docs/Data Analyst Jr_Adrian Vinueza (spn).pdf" class="btn btn-primary ms-2" download style="background-color: #186fc0; border-color: #186fc0; color: white; transition: opacity 0.3s;">
             <i class="bi bi-download" style="color: white;"></i> ESP
           </a>
-      </div>
+        </div>
+
+        <style>
+          .btn:hover {
+              opacity: 0.7;
+          }
+        </style>
       </div><!-- End Section Title -->
 
       <div class="container">
@@ -532,12 +538,12 @@
                     <button type="button" class="calendly-button" onclick="openCalendlyWidget()">Schedule Meeting</button>
                   </div>
 
-                    <script>
-                        function openCalendlyWidget() {
-                            Calendly.initPopupWidget({ url: 'https://calendly.com/ajvinueza92/30min' });
-                            return false;
-                        }
-                    </script><!-- Calendly link widget end -->
+                  <script>
+                      function openCalendlyWidget() {
+                          Calendly.initPopupWidget({ url: 'https://calendly.com/ajvinueza92/30min' });
+                          return false;
+                      }
+                  </script><!-- Calendly link widget end -->
                 </div>
 
               </div>
