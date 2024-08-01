@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Embedded Report</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+        }
+        .iframe-container {
+            width: 100%;
+            height: 100vh; /* Ocupa toda la altura de la ventana del navegador */
+            overflow: hidden; /* Evita barras de desplazamiento si el iframe es más grande */
+        }
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="iframe-container">
+        <iframe title="sstore-db" src="https://app.powerbi.com/reportEmbed?reportId=1c76337f-fbf4-4fc1-95ab-5c9ded9f579f&autoAuth=true&embeddedDemo=true" allowFullScreen="true"></iframe>
+    </div>
+</body>
+</html>
+
+
