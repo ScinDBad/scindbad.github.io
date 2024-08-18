@@ -88,8 +88,11 @@
                   margin: 0 16px; /* Espacio alrededor del texto "or" */
               }
             </style>
-            <button type="button" class="calendly-button" onclick="openCalendlyWidget()">Schedule Meeting</button>
-          </div>
+            <div class="button-container">
+              <link href="https://assets.calendly.com/assets/external/widget.css" rel="stylesheet">
+              <script src="https://assets.calendly.com/assets/external/widget.js" type="text/javascript" async></script>
+              <button type="button" class="calendly-button" onclick="openCalendlyWidget()">Schedule Meeting</button>
+            </div>
         </div>
       </div>
     </section><!-- /Home Section -->
