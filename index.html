@@ -88,11 +88,24 @@
                   margin: 0 16px; /* Espacio alrededor del texto "or" */
               }
             </style>
+
             <div class="button-container">
+              <button type="submit">Send Message</button>
+              <span class="or-text">or</span>
               <link href="https://assets.calendly.com/assets/external/widget.css" rel="stylesheet">
               <script src="https://assets.calendly.com/assets/external/widget.js" type="text/javascript" async></script>
               <button type="button" class="calendly-button" onclick="openCalendlyWidget()">Schedule Meeting</button>
             </div>
+
+
+            
+
+            <script>
+                function openCalendlyWidget() {
+                    Calendly.initPopupWidget({ url: 'https://calendly.com/ajvinueza92/30min' });
+                    return false;
+                }
+            </script><!-- Calendly link widget end -->
         </div>
       </div>
     </section><!-- /Home Section -->
