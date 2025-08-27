@@ -1,0 +1,386 @@
+<!DOCTYPE html><html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Planificador de Consumo (AC) – v2</title>
+<style>
+  :root{
+    --bg:#ffffff; --ink:#111827; --muted:#6b7280; --tile:#f3f4f6; --ring:#e5e7eb; --ok:#16a34a; --warn:#f59e0b; --bad:#dc2626;
+    --btn:#111827; --btn-ink:#fff;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial,sans-serif}
+  .wrap{max-width:980px;margin:0 auto;padding:16px}
+  h1{font-size:20px;margin:0 0 6px}
+  p.small{color:var(--muted);font-size:12px;margin:4px 0}
+  .panel{background:var(--tile);border:1px solid var(--ring);border-radius:12px;padding:10px;margin:10px 0}
+  .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+  .row > *{flex:0 0 auto}
+  label{font-size:12px;color:var(--muted)}
+  input[type="number"]{width:90px;padding:6px;border:1px solid var(--ring);border-radius:8px;background:#fff;color:var(--ink)}
+  input[type="range"]{width:140px}
+  .btn{cursor:pointer; border:1px solid var(--btn); background:var(--btn); color:var(--btn-ink); padding:6px 10px; border-radius:999px; font-size:12px}
+  .btn.ghost{background:#fff;color:var(--btn);}
+  .btn.small{padding:4px 8px;font-size:12px}
+  .pill{font-size:12px;padding:2px 8px;border-radius:999px;display:inline-block}
+  .pill.ok{background:#dcfce7;color:#065f46}
+  .pill.warn{background:#fef3c7;color:#92400e}
+  .pill.bad{background:#fee2e2;color:#991b1b}
+  table{width:100%;border-collapse:separate;border-spacing:0 6px}
+  th,td{font-size:12px;padding:6px 8px}
+  thead th{color:var(--muted);font-weight:600;border-bottom:1px solid var(--ring)}
+  tbody tr{background:#fff;border:1px solid var(--ring)}
+  tbody td{border-top:1px solid var(--ring)}
+  tbody tr:first-child td{border-top:none}
+  .cell{display:flex;align-items:center;gap:6px}
+  .seg{display:inline-flex;align-items:center;border:1px solid var(--ring);border-radius:999px;overflow:hidden}
+  .seg button{border:none;background:#fff;padding:4px 8px;font-size:12px;cursor:pointer}
+  .seg input{width:54px;text-align:center;border:none;border-left:1px solid var(--ring);border-right:1px solid var(--ring);padding:4px 0}
+  .seg .lab{padding:0 8px;color:var(--muted)}
+  .muted{color:var(--muted)}
+  .right{margin-left:auto}
+  .totals{display:flex;gap:8px;flex-wrap:wrap}
+  .totals .box{background:#fff;border:1px solid var(--ring);border-radius:10px;padding:6px 10px;font-size:12px}
+  .note{font-size:11px;color:var(--muted)}
+  .json-buttons{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+  .json-buttons button{font-size:12px;padding:4px 8px;border-radius:6px;border:1px solid var(--ring);cursor:pointer;background:#fff}
+  /* Resaltado dinámico de filas por consumo */
+  .hi-low{background:#ecfdf5 !important}
+  .hi-mid{background:#fffbeb !important}
+  .hi-high{background:#fef2f2 !important}
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Planificador de Consumo (AC) – v2</h1>
+    <p class="small">Baterías: 6 × 12.8V × 18Ah = <b>108 Ah</b>. Objetivo: no bajar de la reserva (por defecto 20%). Cálculo: Ah = (W efectivos × horas) / (12.8 × eficiencia del inversor).</p><div class="panel">
+  <div class="row">
+    <div>
+      <label>Ah disponibles ahora</label><br>
+      <div class="seg">
+        <button id="ahMinus">−</button>
+        <input type="number" id="ahDisp" min="0" step="1" value="108">
+        <button id="ahPlus">+</button>
+      </div>
+    </div>
+    <div>
+      <label>Reserva (%)</label><br>
+      <input type="number" id="reservaPct" min="0" max="50" step="1" value="20">
+    </div>
+    <div>
+      <label>Eficiencia inversor</label><br>
+      <div class="row">
+        <input type="number" id="efInv" min="0.70" max="0.98" step="0.01" value="0.85">
+        <input type="range" id="efInvSlider" min="0.70" max="0.98" step="0.01" value="0.85">
+      </div>
+    </div>
+    <div class="right row">
+      <button class="btn small" id="btnSugerir">Aplicar sugerencia (18:30→00:00 / 00:00→08:00)</button>
+      <button class="btn ghost small" id="btnAutoFit">Auto-ajustar para cumplir límite</button>
+      <button class="btn ghost small" id="btnReset">Reset</button>
+    </div>
+  </div>
+</div>
+
+<table>
+  <thead>
+    <tr>
+      <th>Dispositivo</th>
+      <th>Smart</th>
+      <th>W máx</th>
+      <th>ON</th>
+      <th>Intensidad</th>
+      <th>Horas</th>
+      <th>Ah</th>
+    </tr>
+  </thead>
+  <tbody id="tbody"></tbody>
+</table>
+
+<div class="panel">
+  <div class="totals">
+    <div class="box">Reserva Ah: <b><span id="resAh">21.6</span></b></div>
+    <div class="box">Presupuesto Ah (usables): <b><span id="budgetAh">86.4</span></b></div>
+    <div class="box">Plan Ah: <b><span id="planAh">0.0</span></b></div>
+    <div class="box">Ah restantes: <b><span id="restAh">86.4</span></b></div>
+    <div class="box">SOC resultante estimado: <b><span id="socEnd">100%</span></b></div>
+    <div class="box">Estado: <span id="estado" class="pill ok">OK</span></div>
+  </div>
+  <div class="json-buttons">
+    <button id="expMedio">Exportar Ahorro medio</button>
+    <button id="impMedio">Importar Ahorro medio</button>
+    <button id="expAlto">Exportar Ahorro alto</button>
+    <button id="impAlto">Importar Ahorro alto</button>
+  </div>
+</div>
+
+  </div><script>
+const V_BAT = 12.8;
+const CAP_AH = 108; // capacidad total
+const SCHEMA_VERSION = '1.0';
+const TZ = 'America/Guayaquil';
+
+const devices = [
+  {id:'luz_dorm', name:'Luz Dormitorio', smart:true, watts:9, on:true, intensity:30, hours:6},
+  {id:'luz_bano', name:'Luz Baño', smart:false, watts:8, on:true, intensity:100, hours:1.5},
+  {id:'ext_bano', name:'Extractor Baño', smart:false, watts:15, on:true, intensity:100, hours:1.5},
+  {id:'luz_cocina', name:'Luz Cocina', smart:false, watts:12, on:true, intensity:100, hours:2},
+  {id:'luz_comedor', name:'Luz Comedor', smart:true, watts:8, on:true, intensity:50, hours:6},
+  {id:'luz_entrada', name:'Luz Entrada', smart:true, watts:8, on:true, intensity:50, hours:6},
+  {id:'luz_exterior', name:'Luz Exterior', smart:true, watts:8, on:true, intensity:70, hours:12},
+  {id:'p1', name:'Foco 1 patio', smart:true, watts:11, on:true, intensity:100, hours:6},
+  {id:'fan_patio', name:'Ventilador patio', smart:false, watts:11, on:false, intensity:100, hours:0},
+  {id:'p2', name:'Foco 2 patio', smart:true, watts:10, on:true, intensity:50, hours:6},
+  {id:'p3', name:'Foco 3 patio', smart:false, watts:12, on:false, intensity:100, hours:0},
+  {id:'p4', name:'Foco 4 patio', smart:true, watts:10, on:true, intensity:100, hours:6},
+  {id:'tv_noche', name:'TV (noche)', smart:false, watts:37, on:true, intensity:100, hours:2},
+  {id:'tv_dia', name:'TV (día)', smart:false, watts:64, on:false, intensity:100, hours:0},
+  {id:'cam1', name:'Cámara Wi‑Fi 1', smart:false, watts:2.666, on:true, intensity:100, hours:24},
+  {id:'cam2', name:'Cámara Wi‑Fi 2', smart:false, watts:2.666, on:true, intensity:100, hours:24},
+  {id:'cam3', name:'Cámara Wi‑Fi 3', smart:false, watts:2.666, on:true, intensity:100, hours:24},
+  {id:'alexa', name:'Alexa (Echo)', smart:false, watts:3, on:true, intensity:100, hours:9.5},
+];
+
+const tbody = document.getElementById('tbody');
+const ahDisp = document.getElementById('ahDisp');
+const reservaPct = document.getElementById('reservaPct');
+const efInv = document.getElementById('efInv');
+const efInvSlider = document.getElementById('efInvSlider');
+
+function fmt(n){return (Math.round(n*10)/10).toFixed(1)}
+
+function render(){
+  tbody.innerHTML = '';
+  devices.forEach((d)=>{
+    const tr = document.createElement('tr'); tr.id = 'row_'+d.id;
+    // Dispositivo
+    const tdName = document.createElement('td'); tdName.textContent = d.name; tr.appendChild(tdName);
+    // Smart
+    const tdSmart = document.createElement('td'); tdSmart.textContent = d.smart? 'Sí':'No'; tdSmart.style.textAlign='center'; tr.appendChild(tdSmart);
+    // W
+    const tdW = document.createElement('td'); tdW.textContent = d.watts; tdW.style.textAlign='right'; tr.appendChild(tdW);
+    // ON
+    const tdOn = document.createElement('td');
+    const on = document.createElement('input'); on.type='checkbox'; on.checked=d.on; on.className='onchk'; on.dataset.id=d.id;
+    on.addEventListener('change',()=>{ d.on=on.checked; if(!d.on){d.hours=0;} calc(); });
+    tdOn.appendChild(on); tdOn.style.textAlign='center'; tr.appendChild(tdOn);
+    // Intensidad
+    const tdInt = document.createElement('td');
+    if(d.smart){
+      const wrap = document.createElement('div'); wrap.className='seg';
+      const minus = document.createElement('button'); minus.textContent='−'; minus.title='-5%';
+      const lab = document.createElement('div'); lab.className='lab'; lab.textContent = d.intensity+'%';
+      const plus = document.createElement('button'); plus.textContent='+'; plus.title='+5%';
+      minus.addEventListener('click',()=>{ d.intensity=Math.max(0,d.intensity-5); lab.textContent=d.intensity+'%'; if(d.intensity===0){d.on=false;d.hours=0;} calc(); });
+      plus.addEventListener('click',()=>{ d.intensity=Math.min(100,d.intensity+5); lab.textContent=d.intensity+'%'; if(d.intensity>0 && d.hours>0){d.on=true;} calc(); });
+      wrap.append(minus,lab,plus); tdInt.appendChild(wrap);
+    } else { tdInt.innerHTML = '<span class="muted">—</span>'; }
+    tr.appendChild(tdInt);
+    // Horas
+    const tdHr = document.createElement('td');
+    const wrap2 = document.createElement('div'); wrap2.className='seg';
+    const minusH = document.createElement('button'); minusH.textContent='−'; minusH.title='-0.5 h';
+    const inpH = document.createElement('input'); inpH.type='number'; inpH.step='0.5'; inpH.min='0'; inpH.value=d.hours; inpH.className='hrinp'; inpH.dataset.id=d.id;
+    const plusH = document.createElement('button'); plusH.textContent='+'; plusH.title='+0.5 h';
+    const syncH = ()=>{ d.hours = Math.max(0, parseFloat(inpH.value||0)); if(d.hours===0){d.on=false;} else {d.on=true;} calc(); };
+    minusH.addEventListener('click',()=>{ inpH.value = Math.max(0,(parseFloat(inpH.value||0)-0.5)); syncH(); });
+    plusH.addEventListener('click',()=>{ inpH.value = (parseFloat(inpH.value||0)+0.5); syncH(); });
+    inpH.addEventListener('change', syncH);
+    wrap2.append(minusH, inpH, plusH); tdHr.appendChild(wrap2); tr.appendChild(tdHr);
+    // Ah
+    const tdAh = document.createElement('td'); tdAh.style.textAlign='right'; tdAh.id='ah_'+d.id; tr.appendChild(tdAh);
+
+    tbody.appendChild(tr);
+  });
+  calc();
+}
+
+function calc(){
+  const ef = parseFloat(efInv.value||0.85);
+  const disp = parseFloat(ahDisp.value||108);
+  const resPct = Math.min(100, Math.max(0, parseFloat(reservaPct.value||20)));
+  const reserveAh = CAP_AH * (resPct/100);
+  const budget = Math.max(0, disp - reserveAh);
+
+  let totalAh = 0;
+  devices.forEach(d=>{
+    const wEff = (d.smart? (d.watts * (d.intensity/100)) : d.watts) * (d.on?1:0);
+    const ah = (wEff * d.hours) / (V_BAT * ef);
+    totalAh += ah;
+    const cell = document.getElementById('ah_'+d.id);
+    if(cell){
+      cell.textContent = fmt(ah);
+      if(ah>5){cell.style.color='var(--bad)';}
+      else if(ah>=2){cell.style.color='var(--warn)';}
+      else {cell.style.color='var(--ok)';}
+    }
+    const row = document.getElementById('row_'+d.id);
+    if(row){ row.classList.remove('hi-low','hi-mid','hi-high');
+      if(ah>5){ row.classList.add('hi-high'); }
+      else if(ah>=2){ row.classList.add('hi-mid'); }
+      else { row.classList.add('hi-low'); }
+    }
+    if(ah===0){
+      d.on=false; d.hours=0;
+      const chk = row?.querySelector('input.onchk'); if(chk) chk.checked=false;
+      const hr = row?.querySelector('input.hrinp'); if(hr) hr.value=0;
+    }
+  });
+
+  const rest = budget - totalAh;
+  const socEnd = Math.max(0, (disp - totalAh)/CAP_AH)*100;
+
+  document.getElementById('resAh').textContent = fmt(reserveAh);
+  document.getElementById('budgetAh').textContent = fmt(budget);
+  document.getElementById('planAh').textContent = fmt(totalAh);
+  document.getElementById('restAh').textContent = fmt(rest);
+  document.getElementById('socEnd').textContent = Math.max(0, Math.round(socEnd)) + '%';
+
+  const estado = document.getElementById('estado');
+  estado.className = 'pill ' + (rest>=5? 'ok': rest>=0? 'warn':'bad');
+  estado.textContent = rest>=5? 'OK' : rest>=0? 'Al límite' : 'Excedido';
+}
+
+// ---------- Sugerencias & Auto-Fit ----------
+function aplicarSugerencia(){
+  devices.forEach(d=>{ if(!['cam1','cam2','cam3'].includes(d.id)) { d.on=false; d.hours=0; if(d.smart) d.intensity=100; } });
+  const pre = 5.5;
+  const preIds = ['luz_entrada','luz_exterior','p1','p2','p3','p4','luz_comedor','luz_dorm'];
+  preIds.forEach(id=>{ const d = devices.find(x=>x.id===id); if(d){ d.on=true; d.hours=pre; if(d.smart && id!=='luz_entrada'){ d.intensity=100; } }});
+  const ext = devices.find(x=>x.id==='luz_exterior'); if(ext){ ext.on=true; ext.hours += 8; ext.intensity=100; }
+  const ent = devices.find(x=>x.id==='luz_entrada');
+  if(ent){
+    ent.on = true;
+    const totalH = pre + 8; // 13.5h
+    const ponderada = Math.round(((100*pre + 10*8)/totalH)); // ≈47%
+    ent.hours = totalH; ent.intensity = Math.max(10, Math.min(100, ponderada));
+  }
+  const alexa = devices.find(x=>x.id==='alexa'); if(alexa){ alexa.on=true; alexa.hours=8; }
+  ['cam1','cam2','cam3'].forEach(id=>{ const d=devices.find(x=>x.id===id); if(d){ d.on=true; d.hours=24; }});
+  render();
+}
+
+function autoFit(){
+  const ef = parseFloat(efInv.value||0.85);
+  const disp = parseFloat(ahDisp.value||108);
+  const resPct = Math.min(100, Math.max(0, parseFloat(reservaPct.value||20)));
+  const budget = Math.max(0, disp - (CAP_AH * (resPct/100)));
+  const cands = ['p1','p2','p4','luz_comedor','luz_dorm'];
+  function totalPlan(){
+    return devices.reduce((acc,d)=>{
+      const wEff = (d.smart? (d.watts * (d.intensity/100)) : d.watts) * (d.on?1:0);
+      return acc + (wEff * d.hours)/(V_BAT*ef);
+    },0);
+  }
+  let total = totalPlan();
+  while(total > budget){
+    let changed = false;
+    for(const id of cands){
+      const d = devices.find(x=>x.id===id);
+      if(d && d.on && d.smart && d.intensity>20){ d.intensity = Math.max(20, d.intensity-5); changed = true; }
+      total = totalPlan();
+      if(total <= budget) break;
+    }
+    if(!changed) break;
+  }
+  render();
+}
+
+function resetAll(){ devices.forEach(d=>{ d.on=false; d.hours=0; if(d.smart) d.intensity=100; }); render(); }
+
+// ---------- Exportar / Importar JSON ----------
+function dtParts(tz){
+  const p = new Intl.DateTimeFormat('en-GB',{ timeZone: tz, year:'numeric', month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit', second:'2-digit', hour12:false }).formatToParts(new Date());
+  const get = t=> p.find(x=>x.type===t).value;
+  return { y:get('year'), m:get('month'), d:get('day'), h:get('hour'), min:get('minute'), s:get('second') };
+}
+function stampForFile(){ const {y,m,d,h,min} = dtParts(TZ); return `${y}${m}${d}-${h}${min}`; }
+function localStamp(){ const {y,m,d,h,min,s} = dtParts(TZ); return `${y}-${m}-${d}T${h}:${min}:${s}`; }
+
+function snapshot(profile){
+  return {
+    version: SCHEMA_VERSION,
+    profile,
+    created_at_local: localStamp(),
+    created_at_utc: new Date().toISOString(),
+    timezone: TZ,
+    globals: {
+      ahDisp: parseFloat(ahDisp.value||108),
+      reservaPct: parseFloat(reservaPct.value||20),
+      efInv: parseFloat(efInv.value||0.85),
+      vBat: V_BAT,
+      capAh: CAP_AH
+    },
+    devices: devices.map(d=>({ id:d.id, on:!!d.on, hours:Number(d.hours||0), intensity: d.smart? Number(d.intensity||0):100, watts:d.watts, smart:d.smart }))
+  };
+}
+
+function exportProfile(profile){
+  const data = snapshot(profile);
+  const blob = new Blob([JSON.stringify(data,null,2)], {type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `${profile==='medio'?'ahorro_medio':'ahorro_alto'}-${stampForFile()}.json`;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(a.href);
+}
+
+function importProfile(expected){
+  const inp = document.createElement('input');
+  inp.type = 'file'; inp.accept = 'application/json,.json';
+  inp.onchange = () => {
+    const file = inp.files && inp.files[0]; if(!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        const data = JSON.parse(reader.result);
+        if(!data || typeof data !== 'object') throw new Error('JSON vacío o inválido');
+        if(data.version && data.version !== SCHEMA_VERSION){
+          if(!confirm(`Versión ${data.version} distinta a ${SCHEMA_VERSION}. ¿Cargar de todos modos?`)) return;
+        }
+        if(data.profile && data.profile !== expected){
+          if(!confirm(`El archivo es perfil "${data.profile}". ¿Aplicarlo como "${expected}" igualmente?`)) return;
+        }
+        if(data.globals){
+          if(typeof data.globals.ahDisp === 'number') ahDisp.value = data.globals.ahDisp;
+          if(typeof data.globals.reservaPct === 'number') reservaPct.value = data.globals.reservaPct;
+          if(typeof data.globals.efInv === 'number'){ efInv.value = data.globals.efInv; efInvSlider.value = data.globals.efInv; }
+        }
+        const unknown = [];
+        if(Array.isArray(data.devices)){
+          data.devices.forEach(it=>{
+            const d = devices.find(x=>x.id===it.id);
+            if(!d){ unknown.push(it.id); return; }
+            d.on = !!it.on;
+            d.hours = Math.max(0, Number(it.hours||0));
+            if(d.smart){ d.intensity = Math.max(0, Math.min(100, Number(it.intensity ?? d.intensity))); }
+          });
+        }
+        render();
+        if(unknown.length){ alert('Importado con advertencias. IDs no reconocidos: '+ unknown.join(', ')); }
+        else { alert('Perfil importado correctamente.'); }
+      } catch(err){ alert('Archivo JSON inválido: '+ err.message); }
+    };
+    reader.readAsText(file);
+  };
+  inp.click();
+}
+
+// ---------- Eventos UI ----------
+document.getElementById('ahMinus').addEventListener('click',()=>{ ahDisp.value = Math.max(0, parseInt(ahDisp.value||108)-1); calc(); });
+document.getElementById('ahPlus').addEventListener('click',()=>{ ahDisp.value = Math.min(CAP_AH, parseInt(ahDisp.value||108)+1); calc(); });
+[ahDisp, reservaPct].forEach(el=> el.addEventListener('input', calc));
+[efInv, efInvSlider].forEach(ctrl=> ctrl.addEventListener('input',(ev)=>{ if(ev.target===efInv){ efInvSlider.value = efInv.value; } if(ev.target===efInvSlider){ efInv.value = efInvSlider.value; } calc(); }));
+document.getElementById('btnSugerir').addEventListener('click', aplicarSugerencia);
+document.getElementById('btnAutoFit').addEventListener('click', autoFit);
+document.getElementById('btnReset').addEventListener('click', resetAll);
+
+document.getElementById('expMedio').addEventListener('click', ()=> exportProfile('medio'));
+document.getElementById('expAlto').addEventListener('click', ()=> exportProfile('alto'));
+document.getElementById('impMedio').addEventListener('click', ()=> importProfile('medio'));
+document.getElementById('impAlto').addEventListener('click', ()=> importProfile('alto'));
+
+// Inicializar
+render();
+</script></body>
+</html>
